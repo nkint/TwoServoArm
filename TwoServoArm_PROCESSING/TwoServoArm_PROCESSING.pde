@@ -76,11 +76,11 @@ void draw() {
   // detect mouse change state and send message
   if (mousePressed && !premouse) {
     //println("----------------------------------------------UP");
-    sendMessage(MOUSEUP, -1, -1);
+    sendMessage(MOUSEUP, 0, 0);
   }
   if (!mousePressed && premouse) {
     //println("----------------------------------------------DOWN");
-    sendMessage(MOUSEDOWN, -1, -1);
+    sendMessage(MOUSEDOWN, 0, 0);
   }
   premouse=mousePressed;
 }
@@ -103,7 +103,7 @@ void drawHelp() {
 
   if (outputFile!=null) {
     fill(255, 0, 0);
-    text("### RECORDING ###", 10, 10);
+    text("### RECORDING ###", 50, 50);
   }
 }
 
@@ -121,7 +121,10 @@ void drawArms() {
 void drawText() {
   fill(0);
   text("theta = "+int(atheta), 10, 20);
-  text("beta = "+int(abeta), 10, 40);
+  text("beta = "+int(abeta), 10, 35);
+  fill(100);
+  text("debug theta = "+int(debug_atheta), 10, 55);
+  text("debug beta = "+int(debug_abeta), 10, 70);
 }
 
 void updateDrawLayer() {
@@ -249,7 +252,7 @@ void sendMessage(char tag, int atheta, int abeta) {
   }
 
   if (outputFile != null) {
-    num_written_message ++;
+    num_written_message += 3;
     outputFile.print(","+tag +","+ int(atheta) + "," + int(abeta));
   }
 }
@@ -268,7 +271,7 @@ void getDataToSend() {
 //---------------------------------------------------------------------------------- utils
 
 float processing2costantinoTHETA(float t) {
-  return (345-degrees(t));
+  return 180-(345-degrees(t) +45);
 }
 
 void keyPressed() {
@@ -324,21 +327,20 @@ void loadAndSend() {
 
   try {
     BufferedReader reader = createReader("design.txt");
-    String line;
-    while ( (line = reader.readLine ()) != null) {
+    String line=reader.readLine ();
+    println(line.length());
 
-      String pts[] = split(line, ','); 
-      int x = int(pts[0]);
-      int y = int(pts[1]);
-      sendMessage(MOUSE, x, y);
+    String cs[] = line.split(",");
+    for(int i=1; i < cs.length; i+=3) {
+      
+      char tag = cs[i].toCharArray()[0];
+      int x = Integer.parseInt( cs[i+1] );
+      int y = Integer.parseInt( cs[i+2] );
+      
+      sendMessage(tag, x, y);
 
-      // wait 40 milliseconds
-      try { 
-        Thread.sleep(40);
-      } 
-      catch(Exception e) {
-        println(e);
-      }
+      // wait some milliseconds..
+      try{Thread.sleep(40);}catch(Exception e){println(e);}
     }//endwhile
   }
   catch (Exception e) {
