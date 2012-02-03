@@ -69,10 +69,15 @@ void draw() {
   if (mousePressed) sendMessage(MOUSE, atheta, abeta);
   
   // detect mouse change state and send message
-  if (mousePressed && !premouse)
+  if (mousePressed && !premouse){
+    //println("DOWN");
     sendMessage(MOUSEDOWN, atheta, abeta);
-  if (!mousePressed && premouse)
+  }
+  if (!mousePressed && premouse) {
+    //println("UP");
     sendMessage(MOUSEUP, atheta, abeta);
+    
+  }
   premouse=mousePressed;
 }
 

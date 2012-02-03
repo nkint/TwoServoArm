@@ -37,12 +37,16 @@ void getDrawFromProcessing() {
       Serial.print("got header. ");
       char tag = Serial.read(); 
       
-      if(tag == MOUSEDOWN)
+      if(tag == MOUSEDOWN) {
+        Serial.println("mouse DOWN. ");
         up.write(100);
-      if(tag == MOUSEUP)
+      }
+      else if(tag == MOUSEUP) {
+        Serial.println("mouse UP. "); 
         up.write(0);
+      }
       
-      if(tag == MOUSE) {
+      else if(tag == MOUSE) {
         Serial.println("got mouse. ");
         unsigned char serialtheta = Serial.read(); // this was sent as a char but a char is [-127-127]. use unsigned char for [0,255]
         unsigned char serialbeta = Serial.read();
