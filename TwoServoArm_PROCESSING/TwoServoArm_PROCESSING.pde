@@ -98,7 +98,8 @@ void drawHelp() {
     "\t o \t: open file"+"design.txt" +"\n"+
     "\t c \t: close file\n"+
     "\t l \t: load and send all file content"+
-    "\n";
+    "\n"+
+    "\t m \t: test PROGMEM avr memory";
   text(s, 10, 300);
 
   if (outputFile!=null) {
@@ -253,7 +254,7 @@ void sendMessage(char tag, int atheta, int abeta) {
 
   if (outputFile != null) {
     num_written_message += 3;
-    outputFile.print(","+tag +","+ int(atheta) + "," + int(abeta));
+    outputFile.print(",'"+tag +"',"+ int(atheta) + "," + int(abeta));
   }
 }
 
@@ -333,14 +334,14 @@ void loadAndSend() {
     String cs[] = line.split(",");
     for(int i=1; i < cs.length; i+=3) {
       
-      char tag = cs[i].toCharArray()[0];
+      char tag = cs[i].toCharArray()[1];
       int x = Integer.parseInt( cs[i+1] );
       int y = Integer.parseInt( cs[i+2] );
       
       sendMessage(tag, x, y);
 
       // wait some milliseconds..
-      try{Thread.sleep(40);}catch(Exception e){println(e);}
+      try{Thread.sleep(20);}catch(Exception e){println(e);}
     }//endwhile
   }
   catch (Exception e) {
