@@ -27,6 +27,7 @@ boolean premouse = false;
 boolean  correct_of_workspace = false;
 
 PrintWriter outputFile = null;
+int num_written_message = 0;
 
 //import java.util.HashSet;
 //HashSet points_set;
@@ -248,7 +249,8 @@ void sendMessage(char tag, int atheta, int abeta) {
   }
 
   if (outputFile != null) {
-    outputFile.print(tag,int(atheta) + "," + int(abeta));
+    num_written_message ++;
+    outputFile.print(","+tag +","+ int(atheta) + "," + int(abeta));
   }
 }
 
@@ -300,8 +302,11 @@ void handleFile() {
   if (key=='o' && outputFile==null) {
     println("open file"+ "design.txt" );
     outputFile = createWriter("design.txt");
+    num_written_message = 0;
   }
   if (key=='c' && outputFile!=null) {
+    outputFile.println('\n');
+    outputFile.print(num_written_message);
     println("close file"+"design.txt");
     outputFile.flush(); // Writes the remaining data to the file
     outputFile.close(); // Finishes the file
