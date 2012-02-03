@@ -8,7 +8,7 @@ float a, b;
 float theta, beta;
 // i due angoli da mandare ad USB_WIREDino
 int atheta, abeta;
-int debug_atheta, debug_abeta;
+int debug_atheta, debug_abeta, debug_pen=0;
 
 int px=0, py=0;
 PGraphics drawLayer;
@@ -20,8 +20,10 @@ public static final char HEADER = '|';
 public static final char MOUSE = 'M';
 public static final char MOUSEUP = 'U';
 public static final char MOUSEDOWN = 'D';
+public static final char DEBUG = 'N';
 
 boolean premouse = false;
+boolean  correct_of_workspace = false;
 
 PrintWriter outputFile = null;
 
@@ -89,10 +91,12 @@ void drawHelp() {
              "\t 0    \t: both servos to zero\n"+
              "\t T-t  \t: increment-decrement servo theta\n"+
              "\t B-b \t: increment-decrement servo beta\n"+
+             "\t N-n  \t: increment-decrement servo pen\n"+
              "\n"+
              "\t o \t: open file"+"design.txt" +"\n"+
              "\t c \t: close file\n"+
-             "\t l \t: load and send all file content";
+             "\t l \t: load and send all file content"+
+             "\n";
   text(s, 10, 300);
   
   if(outputFile!=null) {
@@ -125,6 +129,8 @@ void updateDrawLayer() {
   boolean f2 = (atheta>=0 && atheta<=180)   &&   (abeta>=0 && abeta<=180);
 
   if (f1 && f2) {
+    correct_of_workspace = true;
+    
     drawLayer.beginDraw();
     if (mousePressed) drawLayer.stroke(255, 0, 0);
     else drawLayer.noStroke();
@@ -132,6 +138,8 @@ void updateDrawLayer() {
     drawLayer.endDraw();
   } 
   else {
+    correct_of_workspace = false;
+    
     fill(100, 100);
     rect(0, 0, width, height);
   }
@@ -224,7 +232,11 @@ void serialEvent(Serial p) {
 
 void sendMessage(char tag, int atheta, int abeta) {
   //println("send message "+atheta+" "+abeta);
-
+  if(!correct_of_workspace) {
+    println("OUT OF AVAIABLE WORKSPACE");
+    return;  
+  }
+  
   try {
     myPort.write(HEADER); 
     myPort.write(tag);
@@ -257,7 +269,7 @@ float processing2costantinoTHETA(float t) {
 }
 
 void keyPressed() {
-  println("keypressed "+key);
+  //println("keypressed "+key);
 
   if (key=='o' || key=='c')
     handleFile();
@@ -265,7 +277,7 @@ void keyPressed() {
   if (key=='l')
     loadAndSend();
 
-  if (key=='T' || key=='t' || key=='B' || key=='b' || key=='0')
+  if (key=='T' || key=='t' || key=='B' || key=='b' || key=='0' || key=='N' || key=='n')
     testAngles();
 
   if(key==' ')clear();
@@ -320,6 +332,19 @@ void loadAndSend() {
 }
 
 void testAngles() {
+  if (key=='N') {
+    debug_pen++;
+    debug_pen = constrain(debug_pen, 0,180);
+    sendMessage(DEBUG, debug_pen, 0);
+    return;
+  }
+  if (key=='n') {
+    debug_pen--;
+    debug_pen = constrain(debug_pen, 0,180);
+    sendMessage(DEBUG, debug_pen, 0);
+    return;
+  }
+  
   if (key=='T') debug_atheta++;
   if (key=='t') debug_atheta--;
   if (key=='B') debug_abeta++;

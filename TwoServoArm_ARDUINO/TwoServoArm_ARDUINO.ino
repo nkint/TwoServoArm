@@ -4,6 +4,7 @@
 #define MOUSE     'M' 
 #define MOUSEUP   'U'
 #define MOUSEDOWN 'D'
+#define DEBUG     'N'
 #define MESSAGE_BYTES 5 // the total bytes in a message (??)
 
 #include <Servo.h> 
@@ -42,12 +43,19 @@ void getDrawFromProcessing() {
         up.write(100);
       }
       else if(tag == MOUSEUP) {
-        Serial.println("mouse UP. "); 
+        Serial.print("mouse UP. ");
         up.write(0);
+      } 
+      else if(tag == DEBUG) {
+        unsigned char a = Serial.read(); // this was sent as a char but a char is [-127-127]. use unsigned char for [0,255]
+        unsigned char b = Serial.read();
+        
+        Serial.print("DEBUG up-servo:  ");
+        Serial.println(a);
+        up.write(a);
       }
-      
       else if(tag == MOUSE) {
-        Serial.println("got mouse. ");
+        Serial.print("got mouse. ");
         unsigned char serialtheta = Serial.read(); // this was sent as a char but a char is [-127-127]. use unsigned char for [0,255]
         unsigned char serialbeta = Serial.read();
         
