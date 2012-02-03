@@ -21,6 +21,7 @@ public static final char MOUSE = 'M';
 public static final char MOUSEUP = 'U';
 public static final char MOUSEDOWN = 'D';
 public static final char DEBUG = 'N';
+public static final char MEMORY_DATA = 'A';
 
 boolean premouse = false;
 boolean  correct_of_workspace = false;
@@ -246,16 +247,8 @@ void sendMessage(char tag, int atheta, int abeta) {
     //println("###USB not wired");
   }
 
-//  if (tag==MOUSE || tag==DEBUG) {
-//    try {
-//      
-//    } catch(Exception e) {
-//      //println("###USB not wired");
-//    }
-//  } 
-
   if (outputFile != null) {
-    outputFile.println(int(atheta) + "," + int(abeta));
+    outputFile.print(tag,int(atheta) + "," + int(abeta));
   }
 }
 
@@ -289,6 +282,8 @@ void keyPressed() {
     testAngles();
 
   if (key==' ')clear();
+  
+  if (key=='m')testMemory();
 }
 
 void clear() {
@@ -368,5 +363,10 @@ void testAngles() {
   debug_atheta = constrain(debug_atheta, 0, 180);
   debug_abeta = constrain(debug_abeta, 0, 180);
   sendMessage(MOUSE, debug_atheta, debug_abeta);
+}
+
+void testMemory() {
+  println("test memory");
+  sendMessage(MEMORY_DATA, debug_atheta, debug_abeta);
 }
 
