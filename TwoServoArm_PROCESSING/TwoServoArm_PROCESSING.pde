@@ -42,11 +42,12 @@ void setup() {
 
   drawLayer = createGraphics(width, height, P2D);
 
-  try{
+  try {
     String portName = Serial.list()[0]; 
     myPort = new Serial(this, portName, 115200);
-  } catch(Exception e) {
-    println("### USB NOT WIRED"); 
+  } 
+  catch(Exception e) {
+    println("### USB NOT WIRED");
   }
 }
 
@@ -69,16 +70,15 @@ void draw() {
   px = mouseX;
   py = mouseY;
   if (mousePressed) sendMessage(MOUSE, atheta, abeta);
-  
+
   // detect mouse change state and send message
-  if (mousePressed && !premouse){
-    //println("DOWN");
-    sendMessage(MOUSEDOWN, atheta, abeta);
+  if (mousePressed && !premouse) {
+    //println("----------------------------------------------UP");
+    sendMessage(MOUSEUP, -1, -1);
   }
   if (!mousePressed && premouse) {
-    //println("UP");
-    sendMessage(MOUSEUP, atheta, abeta);
-    
+    //println("----------------------------------------------DOWN");
+    sendMessage(MOUSEDOWN, -1, -1);
   }
   premouse=mousePressed;
 }
@@ -86,21 +86,21 @@ void draw() {
 void drawHelp() {
   fill(0);
   String s = "Press:\n"+
-             "\t space : clear current draw\n"+
-             "\n"+
-             "\t 0    \t: both servos to zero\n"+
-             "\t T-t  \t: increment-decrement servo theta\n"+
-             "\t B-b \t: increment-decrement servo beta\n"+
-             "\t N-n  \t: increment-decrement servo pen\n"+
-             "\n"+
-             "\t o \t: open file"+"design.txt" +"\n"+
-             "\t c \t: close file\n"+
-             "\t l \t: load and send all file content"+
-             "\n";
+    "\t space : clear current draw\n"+
+    "\n"+
+    "\t 0    \t: both servos to zero\n"+
+    "\t T-t  \t: increment-decrement servo theta\n"+
+    "\t B-b \t: increment-decrement servo beta\n"+
+    "\t N-n  \t: increment-decrement servo pen\n"+
+    "\n"+
+    "\t o \t: open file"+"design.txt" +"\n"+
+    "\t c \t: close file\n"+
+    "\t l \t: load and send all file content"+
+    "\n";
   text(s, 10, 300);
-  
-  if(outputFile!=null) {
-    fill(255,0,0);
+
+  if (outputFile!=null) {
+    fill(255, 0, 0);
     text("### RECORDING ###", 10, 10);
   }
 }
@@ -130,7 +130,7 @@ void updateDrawLayer() {
 
   if (f1 && f2) {
     correct_of_workspace = true;
-    
+
     drawLayer.beginDraw();
     if (mousePressed) drawLayer.stroke(255, 0, 0);
     else drawLayer.noStroke();
@@ -139,7 +139,7 @@ void updateDrawLayer() {
   } 
   else {
     correct_of_workspace = false;
-    
+
     fill(100, 100);
     rect(0, 0, width, height);
   }
@@ -232,19 +232,27 @@ void serialEvent(Serial p) {
 
 void sendMessage(char tag, int atheta, int abeta) {
   //println("send message "+atheta+" "+abeta);
-  if(!correct_of_workspace) {
+  if (!correct_of_workspace) {
     println("OUT OF AVAIABLE WORKSPACE");
-    return;  
+    return;
   }
-  
+
   try {
     myPort.write(HEADER); 
     myPort.write(tag);
     myPort.write(atheta); 
     myPort.write(abeta);
   } catch(Exception e) {
-    //println("###USB not wired"); 
+    //println("###USB not wired");
   }
+
+//  if (tag==MOUSE || tag==DEBUG) {
+//    try {
+//      
+//    } catch(Exception e) {
+//      //println("###USB not wired");
+//    }
+//  } 
 
   if (outputFile != null) {
     outputFile.println(int(atheta) + "," + int(abeta));
@@ -280,17 +288,17 @@ void keyPressed() {
   if (key=='T' || key=='t' || key=='B' || key=='b' || key=='0' || key=='N' || key=='n')
     testAngles();
 
-  if(key==' ')clear();
+  if (key==' ')clear();
 }
 
-void clear(){
-   drawLayer = createGraphics(width, height, P2D);
-   if (outputFile!=null) {
-     println("clear, close and open file again");
-     outputFile.flush(); // Writes the remaining data to the file
-     outputFile.close(); // Finishes the file
-     outputFile = createWriter("design.txt");
-   }
+void clear() {
+  drawLayer = createGraphics(width, height, P2D);
+  if (outputFile!=null) {
+    println("clear, close and open file again");
+    outputFile.flush(); // Writes the remaining data to the file
+    outputFile.close(); // Finishes the file
+    outputFile = createWriter("design.txt");
+  }
 }
 
 void handleFile() {
@@ -307,17 +315,17 @@ void handleFile() {
 }
 
 void loadAndSend() {
-  
-  if(outputFile!=null) {
+
+  if (outputFile!=null) {
     outputFile.flush(); // Writes the remaining data to the file
     outputFile.close(); // Finishes the file
     outputFile = null;
   }
-  
+
   try {
     BufferedReader reader = createReader("design.txt");
     String line;
-    while ((line = reader.readLine()) != null) {
+    while ( (line = reader.readLine ()) != null) {
 
       String pts[] = split(line, ','); 
       int x = int(pts[0]);
@@ -325,32 +333,40 @@ void loadAndSend() {
       sendMessage(MOUSE, x, y);
 
       // wait 40 milliseconds
-      try{ Thread.sleep(40); } catch(Exception e) {println(e);}
+      try { 
+        Thread.sleep(40);
+      } 
+      catch(Exception e) {
+        println(e);
+      }
     }//endwhile
   }
-  catch (Exception e) {e.printStackTrace();}
+  catch (Exception e) {
+    e.printStackTrace();
+  }
 }
 
 void testAngles() {
   if (key=='N') {
     debug_pen++;
-    debug_pen = constrain(debug_pen, 0,180);
+    debug_pen = constrain(debug_pen, 0, 180);
     sendMessage(DEBUG, debug_pen, 0);
     return;
   }
   if (key=='n') {
     debug_pen--;
-    debug_pen = constrain(debug_pen, 0,180);
+    debug_pen = constrain(debug_pen, 0, 180);
     sendMessage(DEBUG, debug_pen, 0);
     return;
   }
-  
+
   if (key=='T') debug_atheta++;
   if (key=='t') debug_atheta--;
   if (key=='B') debug_abeta++;
   if (key=='b') debug_abeta--;
   if (key=='0') debug_abeta= debug_atheta = 0;
-  debug_atheta = constrain(debug_atheta, 0,180);
+  debug_atheta = constrain(debug_atheta, 0, 180);
   debug_abeta = constrain(debug_abeta, 0, 180);
   sendMessage(MOUSE, debug_atheta, debug_abeta);
 }
+
